@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import UserInfo, { SessionProvider1 } from './user-info';
+import UserInfo, { SessionProvider1 } from '../user-info';
 import { getServerSession } from '@/server/auth';
 
 export default async function Home() {

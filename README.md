@@ -2,6 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+## Node version
+
+Node version is defined in the `.nvmrc` file.
+
+To use the correct Node version, run:
+
+```bash
+nvm use
+```
+
 First, run the development server:
 
 ```bash
