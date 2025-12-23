@@ -10,6 +10,14 @@ import { db } from '@/server/db/db';
 
 export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db),
+  callbacks: {
+    async session({ session, user }) {
+      if (session.user && user) {
+        session.user.id = user.id;
+      }
+      return session;
+    },
+  },
   providers: [
     GitLabProvider({
       clientId: process.env.GITLAB_CLIENT_ID!,
