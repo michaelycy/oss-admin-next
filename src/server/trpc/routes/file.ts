@@ -6,16 +6,16 @@ import { protectedProcedure, router } from '../trpc';
 import { db } from '@/server/db/db';
 import { files } from '@/server/db/schema';
 import { v4 as uuid } from 'uuid';
-import { desc, gt, sql } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 
 /** 存储桶名称 */
-const bucket = '';
-/** 区域 */
-const region = '';
+const bucket = process.env.COS_BUCKET!;
+/** 区域 ap-shanghai */
+const region = process.env.COS_REGION!;
 
 /** 腾讯云对象存储读取配置 */
-const COS_SECRET_ID = '';
-const COS_SECRET_KEY = '';
+const COS_SECRET_ID = process.env.COS_SECRET_ID!;
+const COS_SECRET_KEY = process.env.COS_SECRET_KEY!;
 
 export const fileRoutes = router({
   /** 创建预签名 URL */
