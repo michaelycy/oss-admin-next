@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils';
 import { trpcPureClient, useTRPC } from '@/utils/trpc-client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Uppy, { Body, Meta, UppyEventMap, UppyFile } from '@uppy/core';
 import { useEffect, useState } from 'react';
 import { RemoteFileItem, LocalFileItem } from './file-item';
+import { Button } from '../ui/button';
 
 export const FileList = (props: { uppy: Uppy }) => {
   const { uppy } = props;
@@ -11,7 +12,30 @@ export const FileList = (props: { uppy: Uppy }) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: filesData, isPending } = useQuery(trpc.file.listFiles.queryOptions());
+  const {
+    data: infiniteQueryFilesData,
+    isPending,
+    fetchNextPage,
+  } = useInfiniteQuery(
+    trpc.file.infiniteListFiles.infiniteQueryOptions(
+      {
+        limit: 3,
+      },
+      {
+        getNextPageParam: lastPage => {
+          console.log(lastPage);
+
+          return lastPage.nextCursor;
+        },
+      }
+    )
+  );
+
+  console.log(infiniteQueryFilesData);
+
+  const filesData =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    infiniteQueryFilesData?.pages.reduce<any[]>((acc, page) => [...acc, ...page.items], []) || [];
 
   useEffect(() => {
     const handler: UppyEventMap<Meta, Body>['upload-success'] = async (file, response) => {
@@ -74,6 +98,8 @@ export const FileList = (props: { uppy: Uppy }) => {
             <RemoteFileItem contentType={file.contentType} name={file.name} url={file.url} />
           </div>
         ))}
+
+        <Button onClick={() => fetchNextPage()}>Load More</Button>
       </div>
     </>
   );

@@ -6,7 +6,7 @@ import { protectedProcedure, router } from '../trpc';
 import { db } from '@/server/db/db';
 import { files } from '@/server/db/schema';
 import { v4 as uuid } from 'uuid';
-import { desc } from 'drizzle-orm';
+import { desc, gt, sql } from 'drizzle-orm';
 
 /** 存储桶名称 */
 const bucket = '';
@@ -99,5 +99,42 @@ export const fileRoutes = router({
       });
 
       return photos;
+    }),
+
+  infiniteListFiles: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.string(),
+            id: z.string(),
+          })
+          .optional(),
+        limit: z.number().default(10),
+      })
+    )
+    .query(async ({ input }) => {
+      const { cursor } = input;
+
+      const photos = await db
+        .select()
+        .from(files)
+        .where(
+          cursor
+            ? sql`("files"."created_at","files"."id") < (${new Date(
+                cursor.createdAt
+              ).toISOString()},${cursor.id})`
+            : undefined
+        )
+        .orderBy(desc(files.createdAt))
+        .limit(input.limit);
+
+      return {
+        items: photos,
+        nextCursor:
+          photos.length > 0
+            ? { createdAt: photos[photos.length - 1].createdAt!, id: photos[photos.length - 1].id }
+            : undefined,
+      };
     }),
 });
