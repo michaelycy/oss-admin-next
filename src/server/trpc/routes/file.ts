@@ -6,7 +6,7 @@ import { protectedProcedure, router } from '../trpc';
 import { db } from '@/server/db/db';
 import { files } from '@/server/db/schema';
 import { v4 as uuid } from 'uuid';
-import { desc, eq } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 
 /** 存储桶名称 */
 const bucket = '';

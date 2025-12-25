@@ -1,12 +1,18 @@
+import { cn } from '@/lib/utils';
 import Uppy from '@uppy/core';
 import { DragEventHandler, useRef, useState, type ReactNode } from 'react';
 
-export const DropZone = (props: {
+interface IDropZoneProps
+  extends Omit<
+    React.HTMLAttributes<HTMLDivElement>,
+    'onDragEnter' | 'onDragOver' | 'onDrop' | 'onDragLeave' | 'children'
+  > {
   uppy: Uppy;
   children: ReactNode | ((isDragging: boolean) => ReactNode);
-}) => {
-  const { children } = props;
-  const { uppy } = props;
+}
+
+export const DropZone = (props: IDropZoneProps) => {
+  const { children, uppy, className, ...rest } = props;
 
   const [isDragging, setIsDragging] = useState(false);
   const timeRef = useRef<NodeJS.Timeout>(null);
@@ -59,7 +65,11 @@ export const DropZone = (props: {
 
   return (
     <div
-      className='w-full h-full flex justify-center items-center border border-dashed border-gray-300'
+      className={cn(
+        'w-full h-full flex justify-center items-center border border-dashed border-gray-300',
+        className
+      )}
+      {...rest}
       onDragEnter={onDragEnter}
       onDrop={onDrop}
       onDragOver={onDragOver}
