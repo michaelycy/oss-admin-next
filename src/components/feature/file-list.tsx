@@ -2,9 +2,10 @@ import { cn } from '@/lib/utils';
 import { trpcPureClient, useTRPC } from '@/utils/trpc-client';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Uppy, { Body, Meta, UppyEventMap, UppyFile } from '@uppy/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RemoteFileItem, LocalFileItem } from './file-item';
 import { Button } from '../ui/button';
+import { ScrollArea } from '../ui/scroll-area';
 
 export const FileList = (props: { uppy: Uppy }) => {
   const { uppy } = props;
@@ -19,19 +20,15 @@ export const FileList = (props: { uppy: Uppy }) => {
   } = useInfiniteQuery(
     trpc.file.infiniteListFiles.infiniteQueryOptions(
       {
-        limit: 3,
+        limit: 10,
       },
       {
         getNextPageParam: lastPage => {
-          console.log(lastPage);
-
           return lastPage.nextCursor;
         },
       }
     )
   );
-
-  console.log(infiniteQueryFilesData);
 
   const filesData =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,7 +45,31 @@ export const FileList = (props: { uppy: Uppy }) => {
           type: file.type || 'image/png',
         })
         .then(() => {
-          queryClient.invalidateQueries(trpc.file.listFiles.queryOptions());
+          // queryClient.setQueriesData(
+          //   trpc.file.infiniteListFiles.infiniteQueryOptions({ limit: 10 }),
+          //   prev => {
+          //     if (!prev) {
+          //       return prev;
+          //     }
+
+          //     return {
+          //       ...prev,
+          //       pages: prev.pages.map((page, index) => {
+          //         if (index === 0) {
+          //           return {
+          //             ...page,
+          //             items: [...page.items, file],
+          //           };
+          //         }
+
+          //         return {
+          //           ...page,
+          //           items: [...page.items, file],
+          //         };
+          //       }),
+          //     };
+          //   }
+          // );
         });
     };
 
@@ -78,11 +99,34 @@ export const FileList = (props: { uppy: Uppy }) => {
     };
   }, [uppy, queryClient, trpc.file.listFiles]);
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (bottomRef.current) {
+      const bottomDom = bottomRef.current;
+      const observer = new IntersectionObserver(
+        ([e]) => {
+          if (e.intersectionRatio > 0.1) {
+            fetchNextPage();
+          }
+        },
+        {
+          threshold: 0.1,
+        }
+      );
+      observer.observe(bottomDom);
+
+      return () => {
+        observer.unobserve(bottomDom);
+        observer.disconnect();
+      };
+    }
+  }, [fetchNextPage]);
+
   return (
-    <>
+    <ScrollArea className='w-full h-full'>
       {isPending && <p>Loading...</p>}
 
-      <div className={cn('flex flex-wrap gap-4 w-full relative')}>
+      <div className={cn('flex justify-center flex-wrap gap-4 relative')}>
         {uploadingFiles.map(file => {
           const url = URL.createObjectURL(file.data as Blob);
 
@@ -98,9 +142,15 @@ export const FileList = (props: { uppy: Uppy }) => {
             <RemoteFileItem contentType={file.contentType} name={file.name} url={file.url} />
           </div>
         ))}
-
-        <Button onClick={() => fetchNextPage()}>Load More</Button>
       </div>
-    </>
+
+      <div
+        className={cn('hidden justify-center p-8', { flex: filesData?.length > 0 })}
+        ref={bottomRef}>
+        <Button variant='ghost' onClick={() => fetchNextPage()}>
+          加载更多
+        </Button>
+      </div>
+    </ScrollArea>
   );
 };

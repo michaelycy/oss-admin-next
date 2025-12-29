@@ -65,10 +65,7 @@ export const DropZone = (props: IDropZoneProps) => {
 
   return (
     <div
-      className={cn(
-        'w-full h-full flex justify-center items-center border border-dashed border-gray-300',
-        className
-      )}
+      className={cn('w-full h-full flex justify-center items-center', className)}
       {...rest}
       onDragEnter={onDragEnter}
       onDrop={onDrop}
