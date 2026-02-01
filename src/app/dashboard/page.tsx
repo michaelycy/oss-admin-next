@@ -28,7 +28,7 @@ export default function Dashboard() {
 
         return { ...result, headers: { 'Content-Type': contentType } };
       },
-    })
+    }),
   );
 
   const progress = useUppyState(uppy, s => s.totalProgress);
@@ -52,7 +52,7 @@ export default function Dashboard() {
 
       <UploadPreview uppy={uppy} />
 
-      <DropZone uppy={uppy} className='h-[calc(100%-60px)]'>
+      <DropZone uppy={uppy} className='h-[calc(100%-60px)] container mx-auto'>
         {isDragging => (
           <>
             {isDragging && (

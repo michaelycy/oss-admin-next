@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { RemoteFileItem, LocalFileItem } from './file-item';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
+import { CopyPath, DeleteFile } from './file-action';
 
 export const FileList = (props: { uppy: Uppy }) => {
   const { uppy } = props;
@@ -26,8 +27,8 @@ export const FileList = (props: { uppy: Uppy }) => {
         getNextPageParam: lastPage => {
           return lastPage.nextCursor;
         },
-      }
-    )
+      },
+    ),
   );
 
   const filesData =
@@ -45,31 +46,31 @@ export const FileList = (props: { uppy: Uppy }) => {
           type: file.type || 'image/png',
         })
         .then(() => {
-          // queryClient.setQueriesData(
-          //   trpc.file.infiniteListFiles.infiniteQueryOptions({ limit: 10 }),
-          //   prev => {
-          //     if (!prev) {
-          //       return prev;
-          //     }
+          queryClient.setQueriesData<{ pages: { items: UppyFile<Meta, Body>[] }[] }>(
+            trpc.file.infiniteListFiles.infiniteQueryOptions({ limit: 10 }),
+            prev => {
+              if (!prev) {
+                return prev;
+              }
 
-          //     return {
-          //       ...prev,
-          //       pages: prev.pages.map((page, index) => {
-          //         if (index === 0) {
-          //           return {
-          //             ...page,
-          //             items: [...page.items, file],
-          //           };
-          //         }
+              return {
+                ...prev,
+                pages: prev.pages.map((page, index) => {
+                  if (index === 0) {
+                    return {
+                      ...page,
+                      items: [...page.items, file],
+                    };
+                  }
 
-          //         return {
-          //           ...page,
-          //           items: [...page.items, file],
-          //         };
-          //       }),
-          //     };
-          //   }
-          // );
+                  return {
+                    ...page,
+                    items: [...page.items, file],
+                  };
+                }),
+              };
+            },
+          );
         });
     };
 
@@ -97,7 +98,7 @@ export const FileList = (props: { uppy: Uppy }) => {
       uppy.off('upload-progress', uploadProgressHandler);
       uppy.off('complete', uploadCompleteHandler);
     };
-  }, [uppy, queryClient, trpc.file.listFiles]);
+  }, [uppy, queryClient, trpc.file.listFiles, trpc.file.infiniteListFiles]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -111,7 +112,7 @@ export const FileList = (props: { uppy: Uppy }) => {
         },
         {
           threshold: 0.1,
-        }
+        },
       );
       observer.observe(bottomDom);
 
@@ -138,7 +139,12 @@ export const FileList = (props: { uppy: Uppy }) => {
         })}
 
         {filesData?.map(file => (
-          <div key={file.id} className='w-32 h-32 flex justify-center items-center border'>
+          <div key={file.id} className='w-32 h-32 flex justify-center items-center border relative'>
+            <div className='absolute inset-0 flex justify-center items-center bg-primary/30 opacity-0 hover:opacity-100 transition-all'>
+              <DeleteFile fileId={file.id} />
+
+              <CopyPath path={file.url} className='absolute right-0 top-0' />
+            </div>
             <RemoteFileItem contentType={file.contentType} name={file.name} url={file.url} />
           </div>
         ))}

@@ -6,7 +6,7 @@ import { protectedProcedure, router } from '../trpc';
 import { db } from '@/server/db/db';
 import { files } from '@/server/db/schema';
 import { v4 as uuid } from 'uuid';
-import { desc, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 
 /** 存储桶名称 */
 const bucket = process.env.COS_BUCKET!;
@@ -25,7 +25,7 @@ export const fileRoutes = router({
         filename: z.string(),
         contentType: z.string(),
         size: z.number(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const isoString = new Date().toISOString();
@@ -60,7 +60,7 @@ export const fileRoutes = router({
         name: z.string(),
         path: z.string(),
         type: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const { session } = ctx;
@@ -111,7 +111,7 @@ export const fileRoutes = router({
           })
           .optional(),
         limit: z.number().default(10),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { cursor } = input;
@@ -122,9 +122,9 @@ export const fileRoutes = router({
         .where(
           cursor
             ? sql`("files"."created_at","files"."id") < (${new Date(
-                cursor.createdAt
+                cursor.createdAt,
               ).toISOString()},${cursor.id})`
-            : undefined
+            : undefined,
         )
         .orderBy(desc(files.createdAt))
         .limit(input.limit);
@@ -136,5 +136,18 @@ export const fileRoutes = router({
             ? { createdAt: photos[photos.length - 1].createdAt!, id: photos[photos.length - 1].id }
             : undefined,
       };
+    }),
+
+  /** 删除文件 根据 ID 移除（逻辑删除） */
+  deleteFileById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      const photo = await db
+        .update(files)
+        .set({ deletedAt: new Date() })
+        .where(eq(files.id, input.id))
+        .returning();
+
+      return photo[0];
     }),
 });

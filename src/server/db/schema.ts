@@ -61,7 +61,7 @@ export const accounts = pgTable(
         columns: [account.provider, account.providerAccountId],
       }),
     },
-  ]
+  ],
 );
 
 /**
@@ -91,7 +91,7 @@ export const verificationTokens = pgTable(
         columns: [verificationToken.identifier, verificationToken.token],
       }),
     },
-  ]
+  ],
 );
 
 export const authenticators = pgTable(
@@ -114,7 +114,7 @@ export const authenticators = pgTable(
         columns: [authenticator.userId, authenticator.credentialID],
       }),
     },
-  ]
+  ],
 );
 
 export const files = pgTable(
@@ -131,9 +131,7 @@ export const files = pgTable(
     contentType: varchar('content_type', { length: 100 }).notNull(),
   },
   // 索引
-  table => ({
-    cursorIdx: index('cursor_idx').on(table.id, table.createdAt),
-  })
+  table => [index('cursor_idx').on(table.id, table.createdAt)],
 );
 
 export const photosRelations = relations(files, ({ one }) => ({
