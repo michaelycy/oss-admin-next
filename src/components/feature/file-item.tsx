@@ -36,6 +36,6 @@ interface IRemoteFileItemProps {
 export const RemoteFileItem = (props: IRemoteFileItemProps) => {
   const { url, name, contentType } = props;
 
-  const isImage = contentType.startsWith('image/');
+  const isImage = contentType?.startsWith('image/');
   return <FileItem isImage={isImage} name={name} url={url} />;
 };

@@ -67,7 +67,7 @@ export const UploadPreview = (props: { uppy: Uppy }) => {
                   setIdx(0);
                 })
               }>
-              上传``
+              上传
             </Button>
           </DialogFooter>
         </DialogContent>

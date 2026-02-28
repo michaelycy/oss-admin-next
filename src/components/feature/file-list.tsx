@@ -23,11 +23,7 @@ export const FileList = (props: { uppy: Uppy }) => {
       {
         limit: 10,
       },
-      {
-        getNextPageParam: lastPage => {
-          return lastPage.nextCursor;
-        },
-      },
+      { getNextPageParam: lastPage => lastPage.nextCursor },
     ),
   );
 
@@ -145,7 +141,11 @@ export const FileList = (props: { uppy: Uppy }) => {
 
               <CopyPath path={file.url} className='absolute right-0 top-0' />
             </div>
-            <RemoteFileItem contentType={file.contentType} name={file.name} url={file.url} />
+            {file.contentType ? (
+              <RemoteFileItem contentType={file.contentType} name={file.name} url={file.url} />
+            ) : (
+              <LocalFileItem file={file.data as Blob} />
+            )}
           </div>
         ))}
       </div>

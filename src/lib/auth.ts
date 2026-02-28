@@ -3,7 +3,7 @@ import NextAuth, { type NextAuthOptions } from 'next-auth';
 // import { PrismaAdapter } from '@auth/prisma-adapter';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 // import CredentialsProvider from 'next-auth/providers/credentials';
-import GitLabProvider from 'next-auth/providers/gitlab';
+import GithubProvider from 'next-auth/providers/github';
 import { db } from '@/server/db/db';
 // import bcrypt from 'bcryptjs';
 // import type { IUser } from '@/types/auth';
@@ -19,9 +19,9 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    GitLabProvider({
-      clientId: process.env.GITLAB_CLIENT_ID!,
-      clientSecret: process.env.GITLAB_CLIENT_SECRET!,
+    GithubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
     // CredentialsProvider({
     //   name: 'credentials',
