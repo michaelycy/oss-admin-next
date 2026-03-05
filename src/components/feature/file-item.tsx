@@ -29,13 +29,13 @@ export const LocalFileItem = (props: ILocalFileItemProps) => {
 };
 
 interface IRemoteFileItemProps {
-  url: string;
+  id: string;
   name: string;
   contentType: string;
 }
 export const RemoteFileItem = (props: IRemoteFileItemProps) => {
-  const { url, name, contentType } = props;
+  const { id, name, contentType } = props;
 
   const isImage = contentType?.startsWith('image/');
-  return <FileItem isImage={isImage} name={name} url={url} />;
+  return <FileItem isImage={isImage} name={name} url={`/image/${id}`} />;
 };

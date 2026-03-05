@@ -12,6 +12,8 @@ export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db),
   callbacks: {
     async session({ session, user }) {
+      console.log(session, user);
+
       if (session.user && user) {
         session.user.id = user.id;
       }

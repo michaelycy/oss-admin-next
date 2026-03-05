@@ -12,6 +12,8 @@ import { desc, eq, sql } from 'drizzle-orm';
 const bucket = process.env.COS_BUCKET!;
 /** 区域 ap-shanghai */
 const region = process.env.COS_REGION!;
+/** 腾讯云对象存储 endpoint */
+const cosEndpoint = `https://cos.${region}.myqcloud.com`;
 
 /** 腾讯云对象存储读取配置 */
 const COS_SECRET_ID = process.env.COS_SECRET_ID!;
@@ -40,7 +42,7 @@ export const fileRoutes = router({
       };
 
       const s2Client = new S3Client({
-        endpoint: `https://cos.${region}.myqcloud.com`,
+        endpoint: cosEndpoint,
         region,
         credentials: {
           accessKeyId: COS_SECRET_ID,

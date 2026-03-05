@@ -142,7 +142,7 @@ export const FileList = (props: { uppy: Uppy }) => {
               <CopyPath path={file.url} className='absolute right-0 top-0' />
             </div>
             {file.contentType ? (
-              <RemoteFileItem contentType={file.contentType} name={file.name} url={file.url} />
+              <RemoteFileItem contentType={file.contentType} name={file.name} id={file.id} />
             ) : (
               <LocalFileItem file={file.data as Blob} />
             )}

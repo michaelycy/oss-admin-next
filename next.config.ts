@@ -4,7 +4,15 @@ const nextConfig: NextConfig = {
   /* config options here */
 
   images: {
-    domains: ['localhost', 'test-images-1256211448.cos.ap-shanghai.myqcloud.com'],
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost', pathname: '/**' },
+      { protocol: 'https', hostname: 'localhost', pathname: '/**' },
+      {
+        protocol: 'https',
+        hostname: 'test-images-1256211448.cos.ap-shanghai.myqcloud.com',
+        pathname: '/**',
+      },
+    ],
   },
 };
 
