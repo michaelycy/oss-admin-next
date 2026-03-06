@@ -117,6 +117,9 @@ export const authenticators = pgTable(
   ],
 );
 
+/**
+ * 文件表
+ */
 export const files = pgTable(
   'files',
   {
@@ -134,9 +137,24 @@ export const files = pgTable(
   table => [index('cursor_idx').on(table.id, table.createdAt)],
 );
 
+/**
+ * 文件表 & 用户表 关系
+ */
 export const photosRelations = relations(files, ({ one }) => ({
   photos: one(users, {
     fields: [files.userId],
     references: [users.id],
   }),
 }));
+
+// /**
+//  * 应用表
+//  */
+// export const apps = pgTable('apps', {
+//   id: uuid('id').notNull().primaryKey(),
+//   name: varchar('name', { length: 100 }).notNull(),
+//   description: varchar('description', { length: 1024 }).notNull(),
+//   icon: varchar('icon', { length: 1024 }).notNull(),
+//   url: varchar('url', { length: 1024 }).notNull(),
+//   userId: text('user_id').notNull(),
+// });

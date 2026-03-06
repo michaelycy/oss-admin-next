@@ -23,7 +23,12 @@ export const FileList = (props: { uppy: Uppy }) => {
       {
         limit: 10,
       },
-      { getNextPageParam: lastPage => lastPage.nextCursor },
+      {
+        getNextPageParam: lastPage => lastPage.nextCursor,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+      },
     ),
   );
 

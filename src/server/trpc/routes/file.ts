@@ -6,7 +6,7 @@ import { protectedProcedure, router } from '../trpc';
 import { db } from '@/server/db/db';
 import { files } from '@/server/db/schema';
 import { v4 as uuid } from 'uuid';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
 /** 存储桶名称 */
 const bucket = process.env.COS_BUCKET!;
@@ -85,23 +85,14 @@ export const fileRoutes = router({
     }),
 
   /** 列出用户所有文件 */
-  listFiles: protectedProcedure
-    // .input(
-    //   // z.object({
-    //   //   userId: z.string(),
-    //   // })
-    // )
-    .query(async () => {
-      // const { userId } = input;
+  listFiles: protectedProcedure.query(async ({ ctx }) => {
+    const photos = await db.query.files.findMany({
+      where: (files, { eq }) => eq(files.userId, ctx.session.user.id),
+      orderBy: [desc(files.createdAt)],
+    });
 
-      // const photos = await db.select().from(files).where(eq(files.userId, userId));
-      const photos = await db.query.files.findMany({
-        // where: eq(files.userId, userId),
-        orderBy: [desc(files.createdAt)],
-      });
-
-      return photos;
-    }),
+    return photos;
+  }),
 
   infiniteListFiles: protectedProcedure
     .input(
@@ -115,18 +106,27 @@ export const fileRoutes = router({
         limit: z.number().default(10),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const { cursor } = input;
+
+      const deletedFilter = isNull(files.deletedAt);
+      const userFilter = eq(files.userId, ctx.session.user.id);
+
+      console.log(files.userId);
 
       const photos = await db
         .select()
         .from(files)
         .where(
           cursor
-            ? sql`("files"."created_at","files"."id") < (${new Date(
-                cursor.createdAt,
-              ).toISOString()},${cursor.id})`
-            : undefined,
+            ? and(
+                sql`("files"."created_at","files"."id") < (${new Date(
+                  cursor.createdAt,
+                ).toISOString()},${cursor.id})`,
+                deletedFilter,
+                userFilter,
+              )
+            : and(deletedFilter, userFilter),
         )
         .orderBy(desc(files.createdAt))
         .limit(input.limit);

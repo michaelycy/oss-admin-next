@@ -41,7 +41,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className='mx-auto h-screen'>
+    <div className='mx-auto h-full'>
       <div className='container flex justify-between items-center h-[60px] mx-auto'>
         <Button onClick={() => uppy.upload()}>
           Upload
