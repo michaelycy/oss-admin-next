@@ -1,3 +1,3 @@
 export default function Nav() {
-  return <div> Dashboar333d</div>;
+  return <div> Dashboard</div>;
 }

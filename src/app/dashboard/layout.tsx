@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children, nav }: IDashboardLayou
   const session = await getServerSession();
 
   if (!session?.user) {
-    redirect('/api/auth/signin');
+    return redirect('/api/auth/signin');
   }
 
   return (

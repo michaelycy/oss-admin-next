@@ -7,9 +7,15 @@ import { RemoteFileItem, LocalFileItem } from './file-item';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { CopyPath, DeleteFile } from './file-action';
+import type { IFilesOrderByFieldColumns } from '@/server/trpc/routes/file';
 
-export const FileList = (props: { uppy: Uppy }) => {
-  const { uppy } = props;
+interface IFileListProps {
+  uppy: Uppy;
+  orderBy?: IFilesOrderByFieldColumns;
+  appId: string;
+}
+export const FileList = (props: IFileListProps) => {
+  const { uppy, orderBy, appId } = props;
   const [uploadingFiles, setUploadingFiles] = useState<UppyFile<Meta, Body>[]>([]);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -22,9 +28,11 @@ export const FileList = (props: { uppy: Uppy }) => {
     trpc.file.infiniteListFiles.infiniteQueryOptions(
       {
         limit: 10,
+        orderBy,
+        appId,
       },
       {
-        getNextPageParam: lastPage => lastPage.nextCursor,
+        getNextPageParam: lastPage => (lastPage.hasNextPage ? lastPage.nextCursor : undefined),
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -45,10 +53,11 @@ export const FileList = (props: { uppy: Uppy }) => {
           name: file.name || 'test',
           path: response.uploadURL || '',
           type: file.type || 'image/png',
+          appId,
         })
         .then(() => {
           queryClient.setQueriesData<{ pages: { items: UppyFile<Meta, Body>[] }[] }>(
-            trpc.file.infiniteListFiles.infiniteQueryOptions({ limit: 10 }),
+            trpc.file.infiniteListFiles.infiniteQueryOptions({ limit: 10, appId }),
             prev => {
               if (!prev) {
                 return prev;
@@ -99,7 +108,7 @@ export const FileList = (props: { uppy: Uppy }) => {
       uppy.off('upload-progress', uploadProgressHandler);
       uppy.off('complete', uploadCompleteHandler);
     };
-  }, [uppy, queryClient, trpc.file.listFiles, trpc.file.infiniteListFiles]);
+  }, [uppy, queryClient, trpc.file.listFiles, trpc.file.infiniteListFiles, appId]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -126,9 +135,9 @@ export const FileList = (props: { uppy: Uppy }) => {
 
   return (
     <ScrollArea className='w-full h-full'>
-      {isPending && <p>Loading...</p>}
+      {isPending && <p className='text-center'>Loading...</p>}
 
-      <div className={cn('flex justify-center flex-wrap gap-4 relative')}>
+      <div className={cn('flex justify-flex-start flex-wrap gap-4 relative')}>
         {uploadingFiles.map(file => {
           const url = URL.createObjectURL(file.data as Blob);
 

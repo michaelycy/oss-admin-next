@@ -1,19 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { Uppy } from '@uppy/core';
 import AwsS3 from '@uppy/aws-s3';
+import { MoveUp, MoveDown } from 'lucide-react';
 
-import { useUppyState } from '@/hooks/use-uppy-state';
+// import { useUppyState } from '@/hooks/use-uppy-state';
 import { UploadButton } from '@/components/feature/upload-button';
 import { DropZone } from '@/components/feature/drop-zone';
 import { FileList } from '@/components/feature/file-list';
-
 import { Button } from '@/components/ui/button';
+
 import { usePasteFiles } from '@/hooks/use-paste-files';
 import { trpcPureClient } from '@/utils/trpc-client';
 import { UploadPreview } from '@/components/feature/upload-preview';
-export default function Dashboard() {
+import { IFilesOrderByFieldColumns } from '@/server/trpc/routes/file';
+import Link from 'next/link';
+
+interface IAppDashboardProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+export default function AppDashboard(props: IAppDashboardProps) {
+  const { params } = props;
+  const { id: appId } = use(params);
+
   const [uppy] = useState(() =>
     new Uppy().use(AwsS3, {
       shouldUseMultipart: false,
@@ -31,7 +43,7 @@ export default function Dashboard() {
     }),
   );
 
-  const progress = useUppyState(uppy, s => s.totalProgress);
+  // const progress = useUppyState(uppy, s => s.totalProgress);
 
   // 粘贴文件到上传队列
   usePasteFiles(files => {
@@ -40,14 +52,32 @@ export default function Dashboard() {
     });
   });
 
+  const [orderBy, setOrderBy] = useState<Exclude<IFilesOrderByFieldColumns, undefined>>({
+    field: 'createdAt',
+    order: 'desc',
+  });
+
   return (
     <div className='mx-auto h-full'>
       <div className='container flex justify-between items-center h-[60px] mx-auto'>
-        <Button onClick={() => uppy.upload()}>
+        {/* <Button onClick={() => uppy.upload()}>
           Upload
           <p>Progress: {progress}</p>
+        </Button> */}
+        <Button
+          onClick={() =>
+            setOrderBy(cur => ({ ...cur, order: cur.order === 'desc' ? 'asc' : 'desc' }))
+          }>
+          Created At {orderBy.order === 'desc' ? <MoveUp /> : <MoveDown />}
         </Button>
-        <UploadButton uppy={uppy} />
+
+        <div className='flex items-center gap-4'>
+          <UploadButton uppy={uppy} />
+
+          <Button asChild>
+            <Link href={`/dashboard/apps/new`}>New App</Link>
+          </Button>
+        </div>
       </div>
 
       <UploadPreview uppy={uppy} />
@@ -61,7 +91,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            <FileList uppy={uppy} />
+            <FileList uppy={uppy} orderBy={orderBy} appId={appId} />
           </>
         )}
       </DropZone>
