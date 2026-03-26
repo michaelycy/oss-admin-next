@@ -8,17 +8,7 @@ import { files } from '@/server/db/schema';
 import { v4 as uuid } from 'uuid';
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
 import { filesOrderByFieldColumnsSchema } from '@/server/db/validate-schema';
-
-/** 存储桶名称 */
-const bucket = process.env.COS_BUCKET!;
-/** 区域 ap-shanghai */
-const region = process.env.COS_REGION!;
-/** 腾讯云对象存储 endpoint */
-const cosEndpoint = `https://cos.${region}.myqcloud.com`;
-
-/** 腾讯云对象存储读取配置 */
-const COS_SECRET_ID = process.env.COS_SECRET_ID!;
-const COS_SECRET_KEY = process.env.COS_SECRET_KEY!;
+import { TRPCError } from '@trpc/server';
 
 /** 文件表中支持排序的字段  */
 const filesOrderByFieldColumns = z
@@ -39,26 +29,44 @@ export const fileRoutes = router({
         filename: z.string(),
         contentType: z.string(),
         size: z.number(),
+        appId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const isoString = new Date().toISOString();
       const dateStr = isoString.split('T')[0];
       const { filename, contentType, size } = input;
 
+      const app = await db.query.apps.findFirst({
+        where: (app, { eq }) => eq(app.id, input.appId),
+        // 将关联的存储桶信息也查询出来
+        with: {
+          storage: true,
+        },
+      });
+
+      if (!app || !app.storage) {
+        throw new TRPCError({ code: 'BAD_REQUEST' });
+      }
+
+      if (app.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: 'FORBIDDEN' });
+      }
+
+      const storageConf = app.storage.configuration;
       const params: PutObjectCommandInput = {
-        Bucket: bucket,
+        Bucket: storageConf.bucket,
         Key: `${dateStr}/${filename.replaceAll(' ', '_')}`,
         ContentType: contentType,
         ContentLength: size,
       };
 
       const s2Client = new S3Client({
-        endpoint: cosEndpoint,
-        region,
+        endpoint: storageConf.apiEndpoint,
+        region: storageConf.region,
         credentials: {
-          accessKeyId: COS_SECRET_ID,
-          secretAccessKey: COS_SECRET_KEY,
+          accessKeyId: storageConf.accessKeyId,
+          secretAccessKey: storageConf.secretAccessKey,
         },
       });
 

@@ -6,7 +6,7 @@ export default function InterceptingCreateApp() {
   return (
     <Dialog>
       <DialogContent>
-        <DialogTitle>Create App</DialogTitle>
+        <DialogTitle />
         <CreateApp />
       </DialogContent>
     </Dialog>

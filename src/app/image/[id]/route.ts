@@ -1,6 +1,5 @@
 import { db } from '@/server/db/db';
-import { bucket, s3Client } from '@/server/s3';
-import { GetObjectCommand, GetObjectCommandInput } from '@aws-sdk/client-s3';
+import { GetObjectCommand, GetObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 
@@ -11,19 +10,39 @@ export async function GET(_Req: NextRequest, { params }: { params: Promise<{ id:
   // 根据ID 去数据库中将对应的path 查出来
   const file = await db.query.files.findFirst({
     where: (files, { eq }) => eq(files.id, imageId),
+    with: {
+      app: {
+        with: {
+          storage: true,
+        },
+      },
+    },
   });
+
+  if (!file || !file.app || !file.app.storage) {
+    return new NextResponse('Bad Request', { status: 400 });
+  }
 
   if (!file || !file.contentType.startsWith('image/')) {
     return new NextResponse('Not Found', { status: 404 });
   }
 
+  const storageConf = file.app.storage.configuration;
   const commonInput: GetObjectCommandInput = {
-    Bucket: bucket,
+    Bucket: storageConf.bucket,
     Key: file.path,
   };
 
   try {
     const common = new GetObjectCommand(commonInput);
+    const s3Client = new S3Client({
+      endpoint: storageConf.apiEndpoint,
+      region: storageConf.region,
+      credentials: {
+        accessKeyId: storageConf.accessKeyId,
+        secretAccessKey: storageConf.secretAccessKey,
+      },
+    });
     const res = await s3Client.send(common);
 
     if (!res.Body) {

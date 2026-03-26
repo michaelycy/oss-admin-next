@@ -4,7 +4,6 @@ import { getServerSession } from '@/server/auth';
 import { createAppSchema } from '@/server/db/validate-schema';
 import { appServerCaller } from '@/utils/trpc-server';
 import { redirect } from 'next/navigation';
-// import { revalidatePath } from 'next/cache';
 import SubmitButton from './submit';
 
 export default function NewApp() {
@@ -24,7 +23,6 @@ export default function NewApp() {
 
       const { id: appId } = await appServerCaller(session).app.createApp(input.data);
 
-      // revalidatePath(`/dashboard/apps/${appId}`);
       redirect(`/dashboard/apps/${appId}`);
     } else {
       throw new Error(input.error.message);

@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import { Uppy } from '@uppy/core';
 import AwsS3 from '@uppy/aws-s3';
-import { MoveUp, MoveDown } from 'lucide-react';
+import { MoveUp, MoveDown, Settings } from 'lucide-react';
 
 // import { useUppyState } from '@/hooks/use-uppy-state';
 import { UploadButton } from '@/components/feature/upload-button';
@@ -36,6 +36,7 @@ export default function AppDashboard(props: IAppDashboardProps) {
           filename: file.name || '',
           contentType,
           size: file.size || 0,
+          appId,
         });
 
         return { ...result, headers: { 'Content-Type': contentType } };
@@ -76,6 +77,11 @@ export default function AppDashboard(props: IAppDashboardProps) {
 
           <Button asChild>
             <Link href={`/dashboard/apps/new`}>New App</Link>
+          </Button>
+          <Button asChild>
+            <Link href={`/dashboard/apps/${appId}/storage`}>
+              <Settings />
+            </Link>
           </Button>
         </div>
       </div>
