@@ -79,7 +79,7 @@ export default function AppDashboard(props: IAppDashboardProps) {
             <Link href={`/dashboard/apps/new`}>New App</Link>
           </Button>
           <Button asChild>
-            <Link href={`/dashboard/apps/${appId}/storage`}>
+            <Link href={`/dashboard/apps/${appId}/settings/storage`}>
               <Settings />
             </Link>
           </Button>

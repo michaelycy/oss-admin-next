@@ -1,5 +1,5 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { users, files, apps, storageConfiguration } from './schema';
+import { users, files, apps, storageConfiguration, apiKeys } from './schema';
 
 export const insertUserSchema = createInsertSchema(users);
 
@@ -27,3 +27,5 @@ export const createStorageSchema = createInsertSchema(storageConfiguration, {
       .min(3, 'Storage name must be at least 3 character')
       .max(20, 'Storage name must be at most 20 characters'),
 });
+
+export const createApiKeysSchema = createInsertSchema(apiKeys);

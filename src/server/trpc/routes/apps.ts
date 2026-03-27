@@ -4,7 +4,9 @@ import { createAppSchema } from '@/server/db/validate-schema';
 import { protectedProcedure, router } from '../trpc';
 import { db } from '@/server/db/db';
 import { apps } from '@/server/db/schema';
-import { desc } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
+import z from 'zod';
+import { TRPCError } from '@trpc/server';
 
 export const appsRouter = router({
   /** Create a new app */
@@ -32,4 +34,28 @@ export const appsRouter = router({
     });
     return apps;
   }),
+
+  /** 切换 storage */
+  changeStorage: protectedProcedure
+    .input(z.object({ appId: z.string(), storageId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      // 校验 当前的storage 是否属于当前用户
+      const storage = await db.query.storageConfiguration.findFirst({
+        where: (storages, { eq, and, isNull }) =>
+          and(eq(storages.id, input.storageId), isNull(storages.deletedAt)),
+      });
+      if (!storage) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Storage not found' });
+      }
+
+      if (storage.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Storage not belong to you' });
+      }
+
+      // 更新 app
+      await db
+        .update(apps)
+        .set({ storageId: input.storageId })
+        .where(and(eq(apps.id, input.appId), eq(apps.userId, ctx.session.user.id)));
+    }),
 });

@@ -178,6 +178,7 @@ export const appRelations = relations(apps, ({ one, many }) => ({
     references: [storageConfiguration.id],
   }),
   files: many(files),
+  apiKeys: many(apiKeys),
 }));
 
 export interface IS3StorageConfiguration {
@@ -201,4 +202,18 @@ export const storageConfiguration = pgTable('storageConfiguration', {
 
 export const storageConfigurationRelations = relations(storageConfiguration, ({ one }) => ({
   user: one(users, { fields: [storageConfiguration.userId], references: [users.id] }),
+}));
+
+export const apiKeys = pgTable('apiKeys', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  key: varchar('key', { length: 100 }).notNull(),
+  // userId: text('user_id').notNull(),
+  appId: uuid('app_id').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+  deletedAt: timestamp('deleted_at', { mode: 'date' }),
+});
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  app: one(apps, { fields: [apiKeys.appId], references: [apps.id] }),
 }));
