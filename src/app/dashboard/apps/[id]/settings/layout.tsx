@@ -20,6 +20,7 @@ export default function SettingsLayout({
     <div className='container flex justify-start'>
       <div className='flex flex-col w-40 pt-5 shrink-0 gap-4'>
         {/* <h1 className='text-2xl font-bold'>Settings</h1> */}
+
         <Button
           asChild
           variant='ghost'
@@ -28,6 +29,7 @@ export default function SettingsLayout({
           })}>
           <Link href={`/dashboard/apps/${appId}/settings/storage`}>Storage</Link>
         </Button>
+
         <Button
           asChild
           variant='ghost'

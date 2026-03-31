@@ -1,5 +1,4 @@
 import Uppy from '@uppy/core';
-import Image from 'next/image';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUppyState } from '@/hooks/use-uppy-state';
@@ -24,8 +23,8 @@ export const UploadPreview = (props: { uppy: Uppy }) => {
     return null;
   }
 
-  const isImage = currentFile.type.startsWith('image/');
-  const url = URL.createObjectURL(currentFile.data as Blob);
+  // const isImage = currentFile.type.startsWith('image/');
+  // const url = URL.createObjectURL(currentFile.data as Blob);
 
   return (
     <>

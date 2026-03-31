@@ -406,7 +406,7 @@ export default function Home() {
                 <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3'>
                   <Upload className='w-5 h-5 text-white' />
                 </div>
-                <span className='text-xl font-bold'>ImageHost</span>
+                <span className='text-xl font-bold'>UnoCloud</span>
               </div>
               <p className='text-gray-400 mb-6 leading-relaxed'>
                 专业的图片托管服务，为开发者和企业提供可靠、快速、安全的图片存储解决方案。
@@ -507,7 +507,7 @@ export default function Home() {
           </div>
 
           <div className='border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center'>
-            <p className='text-gray-400 text-sm'>© 2025 ImageHost. 保留所有权利。</p>
+            <p className='text-gray-400 text-sm'>© 2025 UnoCloud. 保留所有权利。</p>
             <div className='flex space-x-6 mt-4 md:mt-0'>
               <a href='#' className='text-gray-400 hover:text-white text-sm transition-colors'>
                 服务条款

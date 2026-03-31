@@ -12,7 +12,10 @@ export const UploadButton = (props: { uppy: Uppy }) => {
 
   return (
     <>
-      <Button onClick={onClick} variant='secondary'>
+      <Button
+        onClick={onClick}
+        variant='outline'
+        className='border-slate-300 bg-white text-slate-700 hover:bg-slate-50'>
         <Plus className='h-4 w-4' />
       </Button>
       <input

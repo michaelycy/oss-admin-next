@@ -23,6 +23,8 @@ export const FileList = (props: IFileListProps) => {
   const {
     data: infiniteQueryFilesData,
     isPending,
+    hasNextPage,
+    isFetchingNextPage,
     fetchNextPage,
   } = useInfiniteQuery(
     trpc.file.infiniteListFiles.infiniteQueryOptions(
@@ -116,7 +118,7 @@ export const FileList = (props: IFileListProps) => {
       const bottomDom = bottomRef.current;
       const observer = new IntersectionObserver(
         ([e]) => {
-          if (e.intersectionRatio > 0.1) {
+          if (e.intersectionRatio > 0.1 && hasNextPage && !isFetchingNextPage) {
             fetchNextPage();
           }
         },
@@ -131,26 +133,34 @@ export const FileList = (props: IFileListProps) => {
         observer.disconnect();
       };
     }
-  }, [fetchNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
-    <ScrollArea className='w-full h-full'>
-      {isPending && <p className='text-center'>Loading...</p>}
+    <ScrollArea className='h-full w-full'>
+      {isPending && (
+        <p className='rounded-lg border border-slate-200 bg-slate-50 py-8 text-center text-slate-500'>
+          Loading...
+        </p>
+      )}
 
-      <div className={cn('flex justify-flex-start flex-wrap gap-4 relative')}>
+      <div className={cn('relative flex flex-wrap justify-start gap-5')}>
         {uploadingFiles.map(file => {
           const url = URL.createObjectURL(file.data as Blob);
 
           return (
-            <div key={url} className='w-32 h-32 flex justify-center items-center border'>
+            <div
+              key={url}
+              className='h-32 w-32 overflow-hidden rounded-lg border border-slate-200 bg-white p-1 shadow-sm'>
               <LocalFileItem file={file.data as Blob} />
             </div>
           );
         })}
 
         {filesData?.map(file => (
-          <div key={file.id} className='w-32 h-32 flex justify-center items-center border relative'>
-            <div className='absolute inset-0 flex justify-center items-center bg-primary/30 opacity-0 hover:opacity-100 transition-all'>
+          <div
+            key={file.id}
+            className='relative h-32 w-32 overflow-hidden rounded-lg border border-slate-200 bg-white p-1 shadow-sm transition hover:border-slate-300'>
+            <div className='absolute inset-0 flex items-center justify-center bg-white/85 opacity-0 transition-all hover:opacity-100'>
               <DeleteFile fileId={file.id} />
 
               <CopyPath path={file.url} className='absolute right-0 top-0' />
@@ -164,11 +174,17 @@ export const FileList = (props: IFileListProps) => {
         ))}
       </div>
 
-      <div
-        className={cn('hidden justify-center p-8', { flex: filesData?.length > 0 })}
-        ref={bottomRef}>
-        <Button variant='ghost' onClick={() => fetchNextPage()}>
-          加载更多
+      <div className={cn('hidden justify-center py-8', { flex: hasNextPage })} ref={bottomRef}>
+        <Button
+          variant='outline'
+          className='border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+          disabled={isFetchingNextPage}
+          onClick={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}>
+          {isFetchingNextPage ? '加载中...' : '加载更多'}
         </Button>
       </div>
     </ScrollArea>

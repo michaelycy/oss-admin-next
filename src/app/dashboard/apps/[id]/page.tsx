@@ -59,40 +59,51 @@ export default function AppDashboard(props: IAppDashboardProps) {
   });
 
   return (
-    <div className='mx-auto h-full'>
-      <div className='container flex justify-between items-center h-[60px] mx-auto'>
-        {/* <Button onClick={() => uppy.upload()}>
+    <div className='mx-auto h-full bg-slate-50'>
+      <div className='container mx-auto pt-6'>
+        <div className='flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:h-[88px] md:flex-row md:items-center md:justify-between md:p-5'>
+          {/* <Button onClick={() => uppy.upload()}>
           Upload
           <p>Progress: {progress}</p>
         </Button> */}
-        <Button
-          onClick={() =>
-            setOrderBy(cur => ({ ...cur, order: cur.order === 'desc' ? 'asc' : 'desc' }))
-          }>
-          Created At {orderBy.order === 'desc' ? <MoveUp /> : <MoveDown />}
-        </Button>
-
-        <div className='flex items-center gap-4'>
-          <UploadButton uppy={uppy} />
-
-          <Button asChild>
-            <Link href={`/dashboard/apps/new`}>New App</Link>
+          <Button
+            variant='outline'
+            className='border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+            onClick={() =>
+              setOrderBy(cur => ({ ...cur, order: cur.order === 'desc' ? 'asc' : 'desc' }))
+            }>
+            Created At {orderBy.order === 'desc' ? <MoveUp /> : <MoveDown />}
           </Button>
-          <Button asChild>
-            <Link href={`/dashboard/apps/${appId}/settings/storage`}>
-              <Settings />
-            </Link>
-          </Button>
+
+          <div className='flex items-center gap-3'>
+            <UploadButton uppy={uppy} />
+
+            <Button asChild className='bg-slate-900 text-white hover:bg-slate-800'>
+              <Link href={`/dashboard/apps/new`}>New App</Link>
+            </Button>
+            <Button
+              asChild
+              variant='outline'
+              className='border-slate-300 bg-white text-slate-700 hover:bg-slate-50'>
+              <Link href={`/dashboard/apps/${appId}/settings/storage`}>
+                <Settings />
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
+      {/* <div className='container mx-auto mt-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm'> */}
       <UploadPreview uppy={uppy} />
+      {/* </div> */}
 
-      <DropZone uppy={uppy} className='h-[calc(100%-60px)] container mx-auto'>
+      <DropZone
+        uppy={uppy}
+        className='container mx-auto mt-4 h-[calc(100%-188px)] rounded-xl border border-slate-200 bg-white p-4 shadow-sm'>
         {isDragging => (
           <>
             {isDragging && (
-              <div className='absolute z-10 inset-0 flex justify-center items-center bg-secondary/50'>
+              <div className='absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-slate-900/10 text-lg font-semibold text-slate-700 backdrop-blur-sm'>
                 请释放文件
               </div>
             )}

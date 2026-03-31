@@ -25,7 +25,7 @@ export default function StorageDashboard({ params }: { params: Promise<{ id: str
         <h1 className='text-2xl font-bold'>API Keys</h1>
 
         <Popover>
-          <PopoverTrigger>
+          <PopoverTrigger asChild>
             <Button variant='outline'>
               <Plus />
             </Button>
